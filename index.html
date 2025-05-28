@@ -60,7 +60,7 @@
       box-shadow: 0px 2px 10px rgba(0,0,0,0.3);
       z-index: 10;
       width: 100%;
-      max-height: 150px;
+      max-height: 200px;
       overflow-y: auto;
     }
 
@@ -102,13 +102,14 @@
     }
 
     #mensaje {
-      margin-top: 25px;
+      margin-top: 30px;
       font-size: 18px;
       font-weight: bold;
       color: #ffffff;
       max-width: 600px;
       text-align: center;
       white-space: pre-line;
+      min-height: 50px;
     }
   </style>
 </head>
@@ -131,7 +132,7 @@
       <div class="single-select-btn" onclick="toggleTypeSelect()">Tipo de Lugar</div>
       <div class="single-select-content" id="type-select-content">
         <label><input type="radio" name="type" value="" checked />Todos</label>
-        <label><input type="radio" name="type" value="restaurant" />Restaurant</label>
+        <label><input type="radio" name="type" value="restaurant" />Restaurante</label>
         <label><input type="radio" name="type" value="bar" />Bar</label>
         <label><input type="radio" name="type" value="cafe" />Café</label>
         <label><input type="radio" name="type" value="clothing_store" />Ropa</label>
@@ -141,6 +142,15 @@
         <label><input type="radio" name="type" value="book_store" />Librería</label>
         <label><input type="radio" name="type" value="jewelry_store" />Joyería</label>
         <label><input type="radio" name="type" value="shoe_store" />Zapatería</label>
+        <label><input type="radio" name="type" value="bakery" />Panadería</label>
+        <label><input type="radio" name="type" value="pharmacy" />Farmacia</label>
+        <label><input type="radio" name="type" value="hardware_store" />Ferretería</label>
+        <label><input type="radio" name="type" value="furniture_store" />Mueblería</label>
+        <label><input type="radio" name="type" value="electronics_store" />Electrónica</label>
+        <label><input type="radio" name="type" value="beauty_salon" />Peluquería / Estética</label>
+        <label><input type="radio" name="type" value="gas_station" />Estación de servicio</label>
+        <label><input type="radio" name="type" value="laundry" />Lavandería</label>
+        <label><input type="radio" name="type" value="pet_store" />Mascotas</label>
       </div>
     </div>
   </div>
@@ -159,10 +169,10 @@
 
     function animarReloj(callback) {
       const mensaje = document.getElementById("mensaje");
-      let frames = ["⏳", "⌛"];
+      let frames = ["⏳ Ejecutando...", "⌛ Ejecutando..."];
       let i = 0;
       let interval = setInterval(() => {
-        mensaje.innerHTML = `<span style="font-size: 28px">${frames[i % 2]} Ejecutando...</span>`;
+        mensaje.innerHTML = `<span style="font-size: 28px;">${frames[i % 2]}</span>`;
         i++;
       }, 500);
       callback(interval);
