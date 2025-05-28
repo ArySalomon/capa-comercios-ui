@@ -36,23 +36,20 @@
       position: relative;
     }
 
-    .dropdown-btn, input[type="text"] {
+    .dropdown-btn, .single-select-btn {
       width: 100%;
       padding: 10px;
       border-radius: 5px;
       border: none;
       font-size: 14px;
       box-sizing: border-box;
-    }
-
-    .dropdown-btn {
       background-color: #ffffff;
       color: #000000;
       text-align: left;
       cursor: pointer;
     }
 
-    .dropdown-content {
+    .dropdown-content, .single-select-content {
       display: none;
       position: absolute;
       top: 42px;
@@ -67,14 +64,16 @@
       overflow-y: auto;
     }
 
-    .dropdown-content label {
+    .dropdown-content label,
+    .single-select-content label {
       display: flex;
       align-items: center;
       padding: 8px;
       cursor: pointer;
     }
 
-    .dropdown-content label:hover {
+    .dropdown-content label:hover,
+    .single-select-content label:hover {
       background-color: #f0f0f0;
     }
 
@@ -83,7 +82,8 @@
       accent-color: #0078d4;
     }
 
-    .dropdown.active .dropdown-content {
+    .dropdown.active .dropdown-content,
+    .dropdown.active .single-select-content {
       display: block;
     }
 
@@ -103,33 +103,12 @@
 
     #mensaje {
       margin-top: 25px;
-      text-align: center;
-    }
-
-    .mensaje-box {
-      background-color: #152942;
-      border-left: 5px solid #00d1ff;
-      padding: 18px 20px;
-      border-radius: 8px;
-      max-width: 600px;
-      color: #ffffff;
-      font-size: 15px;
-      box-shadow: 0px 2px 8px rgba(0,0,0,0.2);
-    }
-
-    .mensaje-box h3 {
-      margin: 0 0 10px;
-      color: #00d1ff;
       font-size: 18px;
-    }
-
-    .mensaje-box p {
-      margin: 6px 0;
-    }
-
-    .mensaje-error {
-      border-left-color: #ff4c4c;
-      background-color: #361c1c;
+      font-weight: bold;
+      color: #ffffff;
+      max-width: 600px;
+      text-align: center;
+      white-space: pre-line;
     }
   </style>
 </head>
@@ -140,6 +119,7 @@
     <div class="input-box dropdown" id="dropdown">
       <div class="dropdown-btn" onclick="toggleDropdown()">Seleccionar Corregimientos</div>
       <div class="dropdown-content" id="dropdown-content">
+        <label><input type="checkbox" value="TODOS" />Todos</label>
         <label><input type="checkbox" value="La Peña" />La Peña</label>
         <label><input type="checkbox" value="Santiago (Cabecera)" />Santiago (Cabecera)</label>
         <label><input type="checkbox" value="La Colorada" />La Colorada</label>
@@ -147,8 +127,21 @@
       </div>
     </div>
 
-    <div class="input-box">
-      <input type="text" id="tipo" placeholder="Ej. restaurant, school, etc." />
+    <div class="input-box dropdown" id="type-select">
+      <div class="single-select-btn" onclick="toggleTypeSelect()">Tipo de Lugar</div>
+      <div class="single-select-content" id="type-select-content">
+        <label><input type="radio" name="type" value="" checked />Todos</label>
+        <label><input type="radio" name="type" value="restaurant" />Restaurant</label>
+        <label><input type="radio" name="type" value="bar" />Bar</label>
+        <label><input type="radio" name="type" value="cafe" />Café</label>
+        <label><input type="radio" name="type" value="clothing_store" />Ropa</label>
+        <label><input type="radio" name="type" value="convenience_store" />Kiosco</label>
+        <label><input type="radio" name="type" value="supermarket" />Supermercado</label>
+        <label><input type="radio" name="type" value="shopping_mall" />Shopping</label>
+        <label><input type="radio" name="type" value="book_store" />Librería</label>
+        <label><input type="radio" name="type" value="jewelry_store" />Joyería</label>
+        <label><input type="radio" name="type" value="shoe_store" />Zapatería</label>
+      </div>
     </div>
   </div>
 
@@ -160,58 +153,66 @@
       document.getElementById("dropdown").classList.toggle("active");
     }
 
+    function toggleTypeSelect() {
+      document.getElementById("type-select").classList.toggle("active");
+    }
+
+    function animarReloj(callback) {
+      const mensaje = document.getElementById("mensaje");
+      let frames = ["⏳", "⌛"];
+      let i = 0;
+      let interval = setInterval(() => {
+        mensaje.innerHTML = `<span style="font-size: 28px">${frames[i % 2]} Ejecutando...</span>`;
+        i++;
+      }, 500);
+      callback(interval);
+    }
+
     async function llamarFuncion() {
       const mensaje = document.getElementById("mensaje");
-      mensaje.innerHTML = `<div class="mensaje-box">⏳ Ejecutando...</div>`;
 
       const checks = document.querySelectorAll("#dropdown-content input[type=checkbox]:checked");
-      const corregimientos = Array.from(checks).map(c => c.value);
-      const tipo = document.getElementById("tipo").value.trim() || null;
+      let corregimientos = Array.from(checks).map(c => c.value);
+      if (corregimientos.includes("TODOS")) corregimientos = null;
+
+      const tipoSeleccionado = document.querySelector("#type-select-content input[type=radio]:checked").value;
+      const tipo = tipoSeleccionado || null;
 
       const payload = {
         corregimiento: corregimientos,
         tipo: tipo
       };
 
-      try {
-        const res = await fetch("https://poblarcapa-517504345692.europe-west1.run.app", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
-        });
+      animarReloj(async (interval) => {
+        try {
+          const res = await fetch("https://poblarcapa-517504345692.europe-west1.run.app", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+          });
 
-        if (res.ok) {
-          const data = await res.json();
-          mensaje.innerHTML = `
-            <div class="mensaje-box">
-              <h3>✅ Ejecución exitosa</h3>
-              <p><strong>${data.total_insertados}</strong> comercios insertados correctamente.</p>
-              <p>⏱ Tiempo de ejecución: <strong>${data.tiempo} segundos</strong></p>
-            </div>
-          `;
-        } else {
-          const texto = await res.text();
-          mensaje.innerHTML = `
-            <div class="mensaje-box mensaje-error">
-              <h3>❌ Error ${res.status}</h3>
-              <p>${texto}</p>
-            </div>
-          `;
+          clearInterval(interval);
+
+          if (res.ok) {
+            const data = await res.json();
+            mensaje.textContent = `✅ Ejecución exitosa\n${data.total_insertados} comercios insertados correctamente.\n\n⏱ Tiempo de ejecución: ${data.tiempo} segundos`;
+          } else {
+            const texto = await res.text();
+            mensaje.textContent = `❌ Error ${res.status}: ${texto}`;
+          }
+        } catch (err) {
+          clearInterval(interval);
+          mensaje.textContent = `❌ Error de red: ${err}`;
         }
-      } catch (err) {
-        mensaje.innerHTML = `
-          <div class="mensaje-box mensaje-error">
-            <h3>❌ Error de red</h3>
-            <p>${err}</p>
-          </div>
-        `;
-      }
+      });
     }
 
     document.addEventListener("click", function(event) {
-      const dropdown = document.getElementById("dropdown");
-      if (!dropdown.contains(event.target)) {
-        dropdown.classList.remove("active");
+      if (!document.getElementById("dropdown").contains(event.target)) {
+        document.getElementById("dropdown").classList.remove("active");
+      }
+      if (!document.getElementById("type-select").contains(event.target)) {
+        document.getElementById("type-select").classList.remove("active");
       }
     });
   </script>
